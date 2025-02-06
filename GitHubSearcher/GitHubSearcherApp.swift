@@ -11,9 +11,16 @@ import SwiftUI
 struct GitHubSearcherApp: App {
     let persistenceController = PersistenceController.shared
 
+
     var body: some Scene {
+        let networkClient = NetworkClient()
+        let repositoriesStorage = RepositoriesStorage()
+        let dataLoader = DataLoader(
+            networkClient: networkClient,
+            repositoriesStorage: repositoriesStorage)
+        
         WindowGroup {
-            ContentView()
+            ContentView(dataLoader: dataLoader)
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
         }
     }

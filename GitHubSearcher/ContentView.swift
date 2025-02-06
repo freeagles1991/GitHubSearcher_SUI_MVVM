@@ -15,6 +15,8 @@ struct ContentView: View {
         sortDescriptors: [NSSortDescriptor(keyPath: \Item.timestamp, ascending: true)],
         animation: .default)
     private var items: FetchedResults<Item>
+    
+    let dataLoader: DataLoaderProtocol
 
     var body: some View {
         NavigationView {
@@ -39,6 +41,15 @@ struct ContentView: View {
                 }
             }
             Text("Select an item")
+        }
+        .onAppear() {
+            let params: [String: String] = [
+                "q" : "SwiftUI",
+                "sort" : "stars",
+                "per_page" : "100",
+                "page" : "1"
+            ]
+            dataLoader.fetchData(with: params)
         }
     }
 
@@ -82,5 +93,5 @@ private let itemFormatter: DateFormatter = {
 }()
 
 #Preview {
-    ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+//    ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
 }
