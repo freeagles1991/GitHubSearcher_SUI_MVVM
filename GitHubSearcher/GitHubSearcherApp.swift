@@ -20,7 +20,9 @@ struct GitHubSearcherApp: App {
             repositoriesStorage: repositoriesStorage)
         
         WindowGroup {
-            ContentView(dataLoader: dataLoader)
+            RepositoriesListView(
+                repositoriesStorage: repositoriesStorage,
+                dataLoader: dataLoader)
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
         }
     }

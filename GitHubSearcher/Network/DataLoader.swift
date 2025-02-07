@@ -35,7 +35,8 @@ struct DataLoader: DataLoaderProtocol{
         networkClient.get(from: url, type: RepositoriesSearchResponse.self) { result in
             switch result {
             case .success(let response):
-                repositoriesStorage.repositories = response.items ?? []
+                guard let items = response.items else { return }
+                repositoriesStorage.repositories = items.map { $0.toRepositoryModel }
                 print("Всего загружено \(repositoriesStorage.repositories.map { $0.fullName } ) репозиториев")
             case .failure(let error):
                 print("\(error)")

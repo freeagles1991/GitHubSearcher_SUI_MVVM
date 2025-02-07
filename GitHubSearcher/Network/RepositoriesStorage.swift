@@ -5,7 +5,9 @@
 //  Created by Дима on 05.02.2025.
 //
 
-class RepositoriesStorage {
-    var repositories: [RepositoryResponse] = []
+import Foundation
+
+class RepositoriesStorage: ObservableObject {
+    @Published var repositories: [RepositoryModel] = []
 }
 

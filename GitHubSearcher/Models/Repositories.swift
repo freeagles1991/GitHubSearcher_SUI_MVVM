@@ -9,8 +9,8 @@ import Foundation
 
 // MARK: - Welcome
 struct RepositoriesSearchResponse: Codable {
-    let totalCount: Int?
-    let incompleteResults: Bool?
+    let totalCount: Int
+    let incompleteResults: Bool
     let items: [RepositoryResponse]?
 
     enum CodingKeys: String, CodingKey {
@@ -22,9 +22,9 @@ struct RepositoriesSearchResponse: Codable {
 
 // MARK: - Item
 struct RepositoryResponse: Codable {
-    let id: Int?
-    let fullName: String?
-    let owner: Owner?
+    let id: Int
+    let fullName: String
+    let owner: Owner
     let description: String?
 
     enum CodingKeys: String, CodingKey {
@@ -35,12 +35,42 @@ struct RepositoryResponse: Codable {
     }
 }
 
+extension RepositoryResponse {
+    var toRepositoryModel: RepositoryModel {
+        let repository = RepositoryModel(
+            id: self.id,
+            fullName: self.fullName,
+            owner: self.owner.login,
+            description: self.description,
+            ownerEmail: "")
+        return repository
+    }
+}
+
+
+
 // MARK: - Owner
 struct Owner: Codable {
-    let login: String?
+    let login: String
 
     enum CodingKeys: String, CodingKey {
         case login
     }
+}
+
+// MARK: - RepositoryLightweight
+struct RepositoryModel {
+    let id: Int
+    let fullName: String
+    let owner: String
+    let description: String?
+    let ownerEmail: String
+    
+    static var defaultRepoItem = RepositoryModel(
+        id: 1,
+        fullName: "Default Repo",
+        owner: "NoName",
+        description: "Default description",
+        ownerEmail: "@ya.com")
 }
 
