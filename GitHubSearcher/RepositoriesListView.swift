@@ -47,8 +47,10 @@ struct RepositoriesListView: View {
                 .background(Color.clear)
                 .listStyle(.plain)
                 .padding(.top, -10)
+                
+                CustomTabBar_SUI()
             }
-            .padding(.horizontal, GlobalVars.screenWidth * 0.025)
+//            .padding(.horizontal, GlobalVars.screenWidth * 0.025)
             
             .onAppear() {
                 let params: [String: String] = [

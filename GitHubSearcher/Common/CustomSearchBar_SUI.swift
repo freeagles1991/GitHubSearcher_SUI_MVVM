@@ -36,7 +36,7 @@ struct CustomSearchBar_SUI: View {
                             .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
                             .padding(.leading, frameHeight * 0.25)
                         
-                        if isEditing {
+                        if isEditing && searchText != "" {
                             Button(action: {
                                 searchText = ""
                             }) {
