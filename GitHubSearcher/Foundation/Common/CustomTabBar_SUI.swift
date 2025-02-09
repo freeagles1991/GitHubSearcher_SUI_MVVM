@@ -32,7 +32,6 @@ struct CustomTabBar_SUI: View {
     
     private let tabs = [
         TabModel(imageName: "magnifyingglass", action: {}),
-        TabModel(imageName: "star.fill", action: {}),
         TabModel(imageName: "star.fill", action: {})
     ]
     
