@@ -8,7 +8,8 @@
 import UIKit
 
 enum GlobalConstants: String {
-    case baseUrl = "https://api.github.com/search/repositories"
+    case baseRepoUrl = "https://api.github.com/search/repositories"
+    case baseUsersUrl = "https://api.github.com/users"
 }
 
 struct GlobalVars {

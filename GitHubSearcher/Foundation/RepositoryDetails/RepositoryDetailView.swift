@@ -9,9 +9,12 @@ import SwiftUI
 
 
 struct RepositoryDetailView: View {
+    let dataLoader: DataLoaderProtocol
     let repositoryModel: RepositoryModel
     var onAddFavoriteButtonTap: (() -> Void)?
     var onBackButtonTap: (() -> Void)?
+    
+    @State var userEmail: String?
     
     var body: some View {
         ZStack {
@@ -67,7 +70,7 @@ struct RepositoryDetailView: View {
                     HStack {
                         Text("E-mail:")
                             .foregroundStyle(.gray)
-                        Text(repositoryModel.ownerEmail)
+                        Text(userEmail ?? "none")
                     }
                     .font(.title2)
                 }
@@ -82,11 +85,26 @@ struct RepositoryDetailView: View {
             }
 
         }
+        .onAppear() {
+            loadUserEmail(userName: repositoryModel.owner)
+        }
+    }
+    
+    private func loadUserEmail(userName: String) {
+        dataLoader.fetchUserData(with: userName) { result in
+            switch result {
+            case .success(let userResponse):
+                userEmail = userResponse.email
+                print("User email fetched = \(String(describing: userEmail))")
+            case .failure(let error):
+                print("Email loading error - \(error)")
+            }
+        }
     }
 }
 
 #Preview {
     let testRepo = RepositoryModel.defaultRepoItem
     
-    RepositoryDetailView(repositoryModel: testRepo)
+    //RepositoryDetailView(repositoryModel: testRepo)
 }

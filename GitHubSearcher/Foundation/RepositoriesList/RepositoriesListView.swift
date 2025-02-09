@@ -38,7 +38,7 @@ struct RepositoriesListView: View {
                         repositoriesStorage.repositories.indices, id: \.self
                         //testRepoItems.indices, id: \.self
                     ) { index in
-                        RepositoryCell_SUI(
+                        RepositoryCell_SUI(dataLoader: dataLoader,
                             repository: $repositoriesStorage.repositories[index]
                             //$testRepoItems[index]
                             , cellHeight: GlobalVars.screenWidth * 0.18)
@@ -60,7 +60,7 @@ struct RepositoriesListView: View {
                         "per_page" : "100",
                         "page" : "1"
                     ]
-                    dataLoader.fetchData(with: params)
+                    dataLoader.fetchRepoData(with: params)
                 }
             }
         }

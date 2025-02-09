@@ -8,13 +8,14 @@
 import SwiftUI
 
 struct RepositoryCell_SUI: View {
+    let dataLoader: DataLoaderProtocol
     @Binding var repository: RepositoryModel
     var cellHeight: CGFloat = 70.0
     var onCellTap: (() -> Void)?
 
     var body: some View {
         NavigationLink {
-            RepositoryDetailView(repositoryModel: repository)
+            RepositoryDetailView(dataLoader: dataLoader, repositoryModel: repository)
         } label: {
             ZStack {
                 let title = repository.fullName

@@ -7,7 +7,8 @@
 import Foundation
 
 protocol DataLoaderProtocol {
-    func fetchData(with params: [String: String])
+    func fetchRepoData(with params: [String: String])
+    func fetchUserData(with userName: String, completion: @escaping (Result<UserResponse, Error>) -> Void)
 }
 
 struct DataLoader: DataLoaderProtocol{
@@ -19,8 +20,8 @@ struct DataLoader: DataLoaderProtocol{
         self.repositoriesStorage = repositoriesStorage
     }
     
-    func fetchData(with params: [String: String]) {
-        guard let baseUrl = URL(string: GlobalConstants.baseUrl.rawValue),
+    func fetchRepoData(with params: [String: String]) {
+        guard let baseUrl = URL(string: GlobalConstants.baseRepoUrl.rawValue),
               var components = URLComponents(url: baseUrl, resolvingAgainstBaseURL: false)
         else {return}
         
@@ -44,6 +45,13 @@ struct DataLoader: DataLoaderProtocol{
         }
     }
     
-    
+    func fetchUserData(with userName: String, completion: @escaping (Result<UserResponse, Error>) -> Void) {
+        guard let url = URL(string: GlobalConstants.baseUsersUrl.rawValue + "/\(userName)")
+        else {return}
+        
+        networkClient.get(from: url, type: UserResponse.self) { result in
+            completion(result)
+        }
+    }
 }
 
