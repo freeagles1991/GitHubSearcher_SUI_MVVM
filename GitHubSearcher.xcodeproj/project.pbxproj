@@ -10,9 +10,22 @@
 		32104F512D53CCA000CDF2B7 /* GitHubSearcher.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GitHubSearcher.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		323DE6942D5B4C5800592DC5 /* Exceptions for "GitHubSearcher" folder in "GitHubSearcher" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				GitHubSearcher.xcdatamodeld,
+			);
+			target = 32104F502D53CCA000CDF2B7 /* GitHubSearcher */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		32104F8A2D53D3E900CDF2B7 /* GitHubSearcher */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				323DE6942D5B4C5800592DC5 /* Exceptions for "GitHubSearcher" folder in "GitHubSearcher" target */,
+			);
 			path = GitHubSearcher;
 			sourceTree = "<group>";
 		};

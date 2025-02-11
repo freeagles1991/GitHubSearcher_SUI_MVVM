@@ -9,9 +9,6 @@ import SwiftUI
 
 @main
 struct GitHubSearcherApp: App {
-    let persistenceController = PersistenceController.shared
-
-
     var body: some Scene {
         let networkClient = NetworkClient()
         let repositoriesStorage = RepositoriesStorage()
@@ -23,7 +20,6 @@ struct GitHubSearcherApp: App {
             RepositoriesListView(
                 repositoriesStorage: repositoriesStorage,
                 dataLoader: dataLoader)
-                .environment(\.managedObjectContext, persistenceController.container.viewContext)
         }
     }
 }
