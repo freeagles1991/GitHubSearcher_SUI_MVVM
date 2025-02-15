@@ -9,12 +9,16 @@ import SwiftUI
 
 
 struct RepositoryDetailView: View {
+    @Environment(\.modelContext) private var modelContext
+    @ObservedObject var swiftDataStore: SwiftDataStoreController
+    
     let dataLoader: DataLoaderProtocol
-    let repositoryModel: RepositoryModel
+    let repositoryModel: Repository
     var onAddFavoriteButtonTap: (() -> Void)?
     var onBackButtonTap: (() -> Void)?
     
     @State var userEmail: String?
+    @State var isFavorite: Bool = false
     
     var body: some View {
         ZStack {
@@ -37,7 +41,7 @@ struct RepositoryDetailView: View {
                         
                         VStack {
                             Button(action: {
-                                
+                                handleFavoriteButtonTap()
                             }) {
                                 Image(systemName: "star")
                                     .resizable()
@@ -101,10 +105,14 @@ struct RepositoryDetailView: View {
             }
         }
     }
+    
+    private func handleFavoriteButtonTap() {
+        
+    }
 }
 
 #Preview {
-    let testRepo = RepositoryModel.defaultRepoItem
+    let testRepo = Repository.defaultRepoItem
     
     //RepositoryDetailView(repositoryModel: testRepo)
 }

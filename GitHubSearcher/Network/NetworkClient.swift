@@ -12,11 +12,12 @@ protocol NetworkClientProtocol {
     func get<T: Decodable>(from url: URL, type: T.Type, completion: @escaping (Result<T, Error>) -> Void)
 }
 
-struct NetworkClient: NetworkClientProtocol {
+final class NetworkClient: NetworkClientProtocol {
     
     // MARK: - Properties
     private let session: URLSession
     private let decoder: JSONDecoder
+    private var currentTask: URLSessionDataTask?
 
     // MARK: - Initializer
     init(session: URLSession = URLSession.shared, decoder: JSONDecoder = JSONDecoder()) {
@@ -26,6 +27,8 @@ struct NetworkClient: NetworkClientProtocol {
 
     // MARK: - Methods
     func get(from url: URL, completion: @escaping (Result<Data, Error>) -> Void) {
+        currentTask?.cancel()
+        
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
 
@@ -46,7 +49,7 @@ struct NetworkClient: NetworkClientProtocol {
                 completion(.failure(NetworkError.noData))
             }
         }
-
+        currentTask = task
         task.resume()
     }
 

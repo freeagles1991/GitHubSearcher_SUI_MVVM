@@ -8,6 +8,6 @@
 import Foundation
 
 class RepositoriesStorage: ObservableObject {
-    @Published var repositories: [RepositoryModel] = []
+    @Published var repositories: [Repository] = []
 }
 

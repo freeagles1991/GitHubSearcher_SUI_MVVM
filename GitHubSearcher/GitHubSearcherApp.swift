@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct GitHubSearcherApp: App {
@@ -15,11 +16,13 @@ struct GitHubSearcherApp: App {
         let dataLoader = DataLoader(
             networkClient: networkClient,
             repositoriesStorage: repositoriesStorage)
+        let swiftDataStore = SwiftDataStoreController()
         
         WindowGroup {
             RepositoriesListView(
                 repositoriesStorage: repositoriesStorage,
-                dataLoader: dataLoader)
+                swiftDataStore: swiftDataStore, dataLoader: dataLoader)
         }
+        .modelContainer(for: RepositoryEntity.self)
     }
 }

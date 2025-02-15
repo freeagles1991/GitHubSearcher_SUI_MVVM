@@ -7,19 +7,23 @@
 
 import SwiftUI
 import CoreData
+import SwiftData
 
 struct RepositoriesListView: View {
-    @Environment(\.managedObjectContext) private var viewContext
+    @Environment(\.modelContext) private var modelContext
     
     @State var searchText: String = ""
     @ObservedObject var repositoriesStorage: RepositoriesStorage
+    @ObservedObject var swiftDataStore: SwiftDataStoreController
+    
+    @State var isFavoriteTabActive: Bool = false
     
     let dataLoader: DataLoaderProtocol
     
-    @State var testRepoItems: [RepositoryModel] = [
-        RepositoryModel.defaultRepoItem,
-        RepositoryModel.defaultRepoItem,
-        RepositoryModel.defaultRepoItem,
+    @State var testRepoItems: [Repository] = [
+        Repository.defaultRepoItem,
+        Repository.defaultRepoItem,
+        Repository.defaultRepoItem,
     ]
     
     var body: some View {
@@ -34,12 +38,12 @@ struct RepositoriesListView: View {
                     
                     //Заглушка для пустого поиска
                     
-                    List(
+                    List(isFavoriteTabActive ? swiftDataStore.favoriteRepositories.indices :
                         repositoriesStorage.repositories.indices, id: \.self
                         //testRepoItems.indices, id: \.self
                     ) { index in
-                        RepositoryCell_SUI(dataLoader: dataLoader,
-                            repository: $repositoriesStorage.repositories[index]
+                        RepositoryCell_SUI(dataLoader: dataLoader, swiftDataStore: swiftDataStore,
+                                           repository: isFavoriteTabActive ? $swiftDataStore.favoriteRepositories[index] : $repositoriesStorage.repositories[index]
                             //$testRepoItems[index]
                             , cellHeight: GlobalVars.screenWidth * 0.18)
                         .listRowBackground(Color.clear)
@@ -54,15 +58,18 @@ struct RepositoriesListView: View {
                 //            .padding(.horizontal, GlobalVars.screenWidth * 0.025)
                 
                 .onAppear() {
-                    let params: [String: String] = [
-                        "q" : "SwiftUI",
-                        "sort" : "stars",
-                        "per_page" : "100",
-                        "page" : "1"
-                    ]
-                    dataLoader.fetchRepoData(with: params)
+                    swiftDataStore.loadFavoriteRepositories()
                 }
             }
+        }
+        .onChange(of: searchText) {
+            let params: [String: String] = [
+                "q" : searchText,
+                "sort" : "stars",
+                "per_page" : "100",
+                "page" : "1"
+            ]
+            dataLoader.fetchRepoData(with: params)
         }
     }
 }

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftData
 
 // MARK: - Welcome
 struct RepositoriesSearchResponse: Codable {
@@ -36,9 +37,9 @@ struct RepositoryResponse: Codable {
 }
 
 extension RepositoryResponse {
-    var toRepositoryModel: RepositoryModel {
-        let repository = RepositoryModel(
-            id: self.id,
+    var toRepositoryModel: Repository {
+        let repository = Repository(
+            id: UUID.from(int: self.id),
             fullName: self.fullName,
             owner: self.owner.login,
             description: self.description,
@@ -59,18 +60,29 @@ struct Owner: Codable {
 }
 
 // MARK: - RepositoryLightweight
-struct RepositoryModel {
-    let id: Int
+struct Repository {
+    let id: UUID
     let fullName: String
     let owner: String
     let description: String?
     let ownerEmail: String
     
-    static var defaultRepoItem = RepositoryModel(
-        id: 1,
+    static var defaultRepoItem = Repository(
+        id: UUID(),
         fullName: "Default Repo",
         owner: "NoName",
         description: "Default description",
         ownerEmail: "@ya.com")
 }
 
+extension Repository {
+    func toRepositoryEntity() -> RepositoryEntity {
+        return RepositoryEntity(
+            id: self.id,
+            fullName: self.fullName,
+            owner: self.owner,
+            repoDescription: self.description,
+            ownerEmail: self.ownerEmail
+        )
+    }
+}
