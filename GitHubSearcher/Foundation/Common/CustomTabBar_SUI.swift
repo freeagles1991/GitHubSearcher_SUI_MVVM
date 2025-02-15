@@ -13,10 +13,8 @@ struct TestView: View {
         VStack {
             Spacer()
             
-            CustomTabBar_SUI()
+           // CustomTabBar_SUI()
         }
-        
-        
     }
 }
 
@@ -29,13 +27,7 @@ struct TabModel: Identifiable {
 struct CustomTabBar_SUI: View {
     let viewHeight: CGFloat = 40
     @State var selectedTabIndex: Int = 0
-    
-    private let tabs = [
-        TabModel(imageName: "magnifyingglass", action: {}),
-        TabModel(imageName: "star.fill", action: {})
-    ]
-    
-    var onTabTap: ((_ tabIndex: Int) -> Void)?
+    let tabs: [TabModel]
     
     var body: some View {
         ZStack {
@@ -49,7 +41,7 @@ struct CustomTabBar_SUI: View {
                         selectedIndex: $selectedTabIndex,
                         imageName: tab.imageName,
                         onTapButton: {
-                            onTabTap?(index)
+                            tab.action()
                         }
                     )
                 }

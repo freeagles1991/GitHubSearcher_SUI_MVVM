@@ -16,7 +16,8 @@ struct RepositoriesListView: View {
     @ObservedObject var repositoriesStorage: RepositoriesStorage
     @ObservedObject var swiftDataStore: SwiftDataStoreController
     
-    @State var isFavoriteTabActive: Bool = false
+    @State private var isFavoriteTabActive: Bool = false
+    @State private var tabs: [TabModel] = []
     
     let dataLoader: DataLoaderProtocol
     
@@ -33,35 +34,52 @@ struct RepositoriesListView: View {
                     .ignoresSafeArea()
                 
                 VStack {
-                    CustomSearchBar_SUI(
-                        searchText: $searchText)
-                    
-                    //Заглушка для пустого поиска
-                    
-                    List(isFavoriteTabActive ? swiftDataStore.favoriteRepositories.indices :
-                        repositoriesStorage.repositories.indices, id: \.self
-                        //testRepoItems.indices, id: \.self
-                    ) { index in
-                        RepositoryCell_SUI(dataLoader: dataLoader, swiftDataStore: swiftDataStore,
-                                           repository: isFavoriteTabActive ? $swiftDataStore.favoriteRepositories[index] : $repositoriesStorage.repositories[index]
-                            //$testRepoItems[index]
-                            , cellHeight: GlobalVars.screenWidth * 0.18)
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
+                    if !isFavoriteTabActive {
+                        CustomSearchBar_SUI(
+                            searchText: $searchText)
+                        
+                        //Заглушка для пустого поиска
+                        
+                        List(isFavoriteTabActive ? swiftDataStore.favoriteRepositories.indices :
+                                repositoriesStorage.repositories.indices, id: \.self
+                             //testRepoItems.indices, id: \.self
+                        ) { index in
+                            RepositoryCell_SUI(dataLoader: dataLoader, swiftDataStore: swiftDataStore,
+                                               repository: isFavoriteTabActive ? $swiftDataStore.favoriteRepositories[index] : $repositoriesStorage.repositories[index]
+                                               //$testRepoItems[index]
+                                               , cellHeight: GlobalVars.screenWidth * 0.18)
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
+                        }
+                        .background(Color.clear)
+                        .listStyle(.plain)
+                        .padding(.top, -10)
+                        
+                    } else {
+                        
+                        Spacer()
                     }
-                    .background(Color.clear)
-                    .listStyle(.plain)
-                    .padding(.top, -10)
                     
-                    CustomTabBar_SUI()
+                    CustomTabBar_SUI(tabs: tabs)
                 }
                 //            .padding(.horizontal, GlobalVars.screenWidth * 0.025)
                 
-                .onAppear() {
-                    swiftDataStore.loadFavoriteRepositories()
-                }
             }
         }
+        
+        .onAppear() {
+            tabs = [
+                TabModel(imageName: "magnifyingglass", action: {
+                    self.isFavoriteTabActive = false
+                }),
+                TabModel(imageName: "star.fill", action: {
+                    self.isFavoriteTabActive = true
+                })
+            ]
+            
+            swiftDataStore.loadFavoriteRepositories()
+        }
+        
         .onChange(of: searchText) {
             let params: [String: String] = [
                 "q" : searchText,
@@ -71,6 +89,14 @@ struct RepositoriesListView: View {
             ]
             dataLoader.fetchRepoData(with: params)
         }
+        
+        .onChange(of: isFavoriteTabActive) {
+            print("isFavoriteTabActive changed \(isFavoriteTabActive)")
+        }
+    }
+    
+    private func switchTabs() {
+        
     }
 }
 
