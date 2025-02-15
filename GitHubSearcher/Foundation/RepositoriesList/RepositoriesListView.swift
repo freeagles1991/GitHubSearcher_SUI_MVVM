@@ -9,9 +9,17 @@ import SwiftUI
 import CoreData
 import SwiftData
 
+enum SearchStates {
+    case empty
+    case loading
+    case loaded
+    case error
+}
+
 struct RepositoriesListView: View {
     @Environment(\.modelContext) private var modelContext
     
+    @State var searchStates: SearchStates = .empty
     @State var searchText: String = ""
     @ObservedObject var repositoriesStorage: RepositoriesStorage
     @ObservedObject var swiftDataStore: SwiftDataStoreController
@@ -38,14 +46,41 @@ struct RepositoriesListView: View {
                         CustomSearchBar_SUI(
                             searchText: $searchText)
                         
-                        //Заглушка для пустого поиска
+                        switch searchStates {
+                        case .empty:
+                            Text("Ничего не найдено или поисковая строка пустая")
+                                .frame(maxWidth: GlobalVars.screenWidth * 0.8, maxHeight: .infinity)
+                        case .loading:
+                            Text("Загрузка...")
+                                .frame(maxWidth: GlobalVars.screenWidth * 0.8, maxHeight: .infinity)
+                        case .loaded:
+                            List(isFavoriteTabActive ? swiftDataStore.favoriteRepositories.indices :
+                                    repositoriesStorage.repositories.indices, id: \.self
+                                 //testRepoItems.indices, id: \.self
+                            ) { index in
+                                RepositoryCell_SUI(dataLoader: dataLoader, swiftDataStore: swiftDataStore,
+                                                   repository: isFavoriteTabActive ? $swiftDataStore.favoriteRepositories[index] : $repositoriesStorage.repositories[index]
+                                                   //$testRepoItems[index]
+                                                   , cellHeight: GlobalVars.screenWidth * 0.18)
+                                .listRowBackground(Color.clear)
+                                .listRowSeparator(.hidden)
+                            }
+                            .background(Color.clear)
+                            .listStyle(.plain)
+                            .padding(.top, -10)
+                        case .error:
+                            Text("Ошибка при загрузке! Повторите попытку")
+                                .frame(maxWidth: GlobalVars.screenWidth * 0.8, maxHeight: .infinity)
+                        }
                         
-                        List(isFavoriteTabActive ? swiftDataStore.favoriteRepositories.indices :
-                                repositoriesStorage.repositories.indices, id: \.self
-                             //testRepoItems.indices, id: \.self
+                        
+                        
+                    } else {
+                        List( swiftDataStore.favoriteRepositories.indices, id: \.self
+                              //testRepoItems.indices, id: \.self
                         ) { index in
                             RepositoryCell_SUI(dataLoader: dataLoader, swiftDataStore: swiftDataStore,
-                                               repository: isFavoriteTabActive ? $swiftDataStore.favoriteRepositories[index] : $repositoriesStorage.repositories[index]
+                                               repository: $swiftDataStore.favoriteRepositories[index]
                                                //$testRepoItems[index]
                                                , cellHeight: GlobalVars.screenWidth * 0.18)
                             .listRowBackground(Color.clear)
@@ -54,10 +89,6 @@ struct RepositoriesListView: View {
                         .background(Color.clear)
                         .listStyle(.plain)
                         .padding(.top, -10)
-                        
-                    } else {
-                        
-                        Spacer()
                     }
                     
                     CustomTabBar_SUI(tabs: tabs)
@@ -81,13 +112,22 @@ struct RepositoriesListView: View {
         }
         
         .onChange(of: searchText) {
-            let params: [String: String] = [
-                "q" : searchText,
-                "sort" : "stars",
-                "per_page" : "100",
-                "page" : "1"
-            ]
-            dataLoader.fetchRepoData(with: params)
+            if !searchText.isEmpty || searchText != "" {
+                let params: [String: String] = [
+                    "q" : searchText,
+                    "sort" : "stars",
+                    "per_page" : "100",
+                    "page" : "1"
+                ]
+                searchStates = .loading
+                dataLoader.fetchRepoData(with: params) {
+                    searchStates = .loaded
+                }
+            } else {
+                searchStates = .empty
+                dataLoader.cancelCurrentTask()
+                repositoriesStorage.clearStorage()
+            }
         }
         
         .onChange(of: isFavoriteTabActive) {

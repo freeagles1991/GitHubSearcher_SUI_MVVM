@@ -10,6 +10,7 @@ import Foundation
 protocol NetworkClientProtocol {
     func get(from url: URL, completion: @escaping (Result<Data, Error>) -> Void)
     func get<T: Decodable>(from url: URL, type: T.Type, completion: @escaping (Result<T, Error>) -> Void)
+    func cancelCurrentTask()
 }
 
 final class NetworkClient: NetworkClientProtocol {
@@ -62,6 +63,11 @@ final class NetworkClient: NetworkClientProtocol {
                 completion(.failure(error))
             }
         }
+    }
+    
+    
+    func cancelCurrentTask() {
+        currentTask?.cancel()
     }
 
     // MARK: - Private
