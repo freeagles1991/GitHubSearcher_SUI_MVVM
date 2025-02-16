@@ -18,11 +18,12 @@ enum SearchStates {
 
 struct RepositoriesListView: View {
     @Environment(\.modelContext) private var modelContext
-    @Environment(SwiftDataStoreController.self) private var dataStore
+    @ObservedObject var repositoriesStorage: RepositoriesStorage
+    @EnvironmentObject var swiftDataStore: SwiftDataStoreController
     
     @State var searchStates: SearchStates = .empty
     @State var searchText: String = ""
-    @ObservedObject var repositoriesStorage: RepositoriesStorage
+
     
     @State private var isFavoriteTabActive: Bool = false
     @State private var tabs: [TabModel] = []
@@ -58,12 +59,12 @@ struct RepositoriesListView: View {
                                 .frame(maxWidth: GlobalVars.screenWidth * 0.8, maxHeight: .infinity)
                         case .loaded:
                             List(repositoriesStorage.repositories.indices, id: \.self
-                                 //testRepoItems.indices, id: \.self
                             ) { index in
-                                RepositoryCell_SUI(dataLoader: dataLoader, swiftDataStore: swiftDataStore,
-                                                   repository: repositoriesStorage.repositories[index]
-                                                   //$testRepoItems[index]
-                                                   , cellHeight: GlobalVars.screenWidth * 0.18)
+                                RepositoryCell_SUI(
+                                    dataLoader: dataLoader,
+                                    swiftDataStore: swiftDataStore,
+                                    repository: repositoriesStorage.repositories[index],
+                                    cellHeight: GlobalVars.screenWidth * 0.18)
                                 .listRowBackground(Color.clear)
                                 .listRowSeparator(.hidden)
                             }
@@ -75,11 +76,11 @@ struct RepositoriesListView: View {
                                 .frame(maxWidth: GlobalVars.screenWidth * 0.8, maxHeight: .infinity)
                         }
                     } else {
-                        List(swiftDataStore.favoriteRepositories, id: \.id) { repository in
+                        List(swiftDataStore.favoriteRepositories.indices, id: \.self) { index in
                             RepositoryCell_SUI(
                                 dataLoader: dataLoader,
                                 swiftDataStore: swiftDataStore,
-                                repository: repository,
+                                repository: swiftDataStore.favoriteRepositories[index],
                                 cellHeight: GlobalVars.screenWidth * 0.18)
                             .listRowBackground(Color.clear)
                             .listRowSeparator(.hidden)
@@ -130,10 +131,6 @@ struct RepositoriesListView: View {
         .onChange(of: isFavoriteTabActive) {
             print("isFavoriteTabActive changed \(isFavoriteTabActive)")
         }
-    }
-    
-    private func switchTabs() {
-        
     }
 }
 

@@ -10,7 +10,7 @@ import SwiftUI
 
 struct RepositoryDetailView: View {
     @Environment(\.modelContext) private var modelContext
-    @Environment(SwiftDataStoreController.self) var swiftDataStore
+    @EnvironmentObject var swiftDataStore: SwiftDataStoreController
     
     let dataLoader: DataLoaderProtocol
     let repository: Repository

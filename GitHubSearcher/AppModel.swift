@@ -6,10 +6,10 @@
 //
 
 import SwiftData
+import Foundation
 
 @MainActor
-@Observable
-class AppModel {
+class AppModel: ObservableObject {
     let modelContainer: ModelContainer
     let dataStore: SwiftDataStoreController
 

@@ -10,8 +10,8 @@ import SwiftData
 
 @main
 struct GitHubSearcherApp: App {
-    @State private var appModel = AppModel()
-    
+    @StateObject private var appModel = AppModel()
+
     var body: some Scene {
         let networkClient = NetworkClient()
         let repositoriesStorage = RepositoriesStorage()
@@ -22,7 +22,7 @@ struct GitHubSearcherApp: App {
         WindowGroup {
             RepositoriesListView(
                 repositoriesStorage: repositoriesStorage, dataLoader: dataLoader)
-            .environment(appModel.dataStore)
+            .environmentObject(appModel.dataStore)
             .modelContainer(appModel.modelContainer)
         }
     }

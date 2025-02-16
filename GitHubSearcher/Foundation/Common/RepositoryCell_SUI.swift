@@ -13,8 +13,6 @@ struct RepositoryCell_SUI: View {
     let repository: Repository
     var cellHeight: CGFloat = 70.0
     var onCellTap: (() -> Void)?
-    
-    @Environment(\.modelContext) private var modelContext
 
     var body: some View {
         NavigationLink {

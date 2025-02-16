@@ -8,26 +8,26 @@
 import SwiftUI
 import SwiftData
 
-@Observable
-final class SwiftDataStoreController {
+@MainActor
+final class SwiftDataStoreController: ObservableObject {
     private let modelContext: ModelContext
-    var favoriteRepositories: [Repository] = []
+    @Published var favoriteRepositories: [Repository] = []
 
     init(modelContext: ModelContext) {
         self.modelContext = modelContext
-        //loadFavoriteRepositories()
+        loadFavoriteRepositories()
     }
     
     func loadFavoriteRepositories() {
         let request = FetchDescriptor<RepositoryEntity>()
-        DispatchQueue.global(qos: .userInitiated).async {
+        DispatchQueue.main.async {
             do {
                 let entities = try self.modelContext.fetch(request)
                 let repositories = entities.map { $0.toRepository() }
 
                 DispatchQueue.main.async {
                     self.favoriteRepositories = repositories
-                    print("[DEBUG] Загружено \(self.favoriteRepositories.count) репозиторов")
+                    print("[DEBUG] Загружено \(self.favoriteRepositories.map { $0.fullName}) репозиторов")
                 }
             } catch {
                 print("[ERROR] Ошибка загрузки данных: \(error)")
@@ -43,18 +43,21 @@ final class SwiftDataStoreController {
 
         let newRepo = repo.toRepositoryEntity()
         modelContext.insert(newRepo)
+        
+        saveChanges()
 
-        loadFavoriteRepositories()
         print("[DEBUG] Репозиторий '\(repo.fullName)' добавлен")
     }
     
     func deleteRepository(_ repo: Repository) {
         let request = FetchDescriptor<RepositoryEntity>()
-        DispatchQueue.global(qos: .userInitiated).async {
+        DispatchQueue.main.async {
             do {
                 let entities = try self.modelContext.fetch(request)
                 if let existingRepo = entities.first(where: { $0.id == repo.id }) {
                     self.modelContext.delete(existingRepo)
+
+                    self.saveChanges()
 
                     DispatchQueue.main.async {
                         self.loadFavoriteRepositories()
@@ -84,13 +87,15 @@ final class SwiftDataStoreController {
     
     func clearAllRepositories() {
         let request = FetchDescriptor<RepositoryEntity>()
-        DispatchQueue.global(qos: .userInitiated).async {
+        DispatchQueue.main.async {
             do {
                 let entities = try self.modelContext.fetch(request)
                 let count = entities.count
                 for repo in entities {
                     self.modelContext.delete(repo)
                 }
+
+                self.saveChanges()
 
                 DispatchQueue.main.async {
                     self.loadFavoriteRepositories()
@@ -99,6 +104,15 @@ final class SwiftDataStoreController {
             } catch {
                 print("[ERROR] Ошибка очистки данных: \(error)")
             }
+        }
+    }
+    
+    private func saveChanges() {
+        do {
+            try modelContext.save()  // Сохраняем изменения в постоянное хранилище
+            print("[DEBUG] Изменения сохранены")
+        } catch {
+            print("[ERROR] Ошибка сохранения данных: \(error)")
         }
     }
 }
