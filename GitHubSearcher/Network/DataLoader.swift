@@ -38,8 +38,10 @@ struct DataLoader: DataLoaderProtocol{
             switch result {
             case .success(let response):
                 guard let items = response.items else { return }
-                repositoriesStorage.repositories = items.map { $0.toRepositoryModel }
-                print("Всего загружено \(repositoriesStorage.repositories.map { $0.fullName } ) репозиториев")
+                DispatchQueue.main.async {
+                    self.repositoriesStorage.repositories = items.map { $0.toRepositoryModel }
+                    print("Всего загружено \(self.repositoriesStorage.repositories.map { $0.fullName } ) репозиториев")
+                }
             case .failure(let error):
                 print("\(error)")
             }

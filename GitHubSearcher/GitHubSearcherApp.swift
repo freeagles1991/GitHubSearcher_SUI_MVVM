@@ -10,19 +10,20 @@ import SwiftData
 
 @main
 struct GitHubSearcherApp: App {
+    @State private var appModel = AppModel()
+    
     var body: some Scene {
         let networkClient = NetworkClient()
         let repositoriesStorage = RepositoriesStorage()
         let dataLoader = DataLoader(
             networkClient: networkClient,
             repositoriesStorage: repositoriesStorage)
-        let swiftDataStore = SwiftDataStoreController()
         
         WindowGroup {
             RepositoriesListView(
-                repositoriesStorage: repositoriesStorage,
-                swiftDataStore: swiftDataStore, dataLoader: dataLoader)
+                repositoriesStorage: repositoriesStorage, dataLoader: dataLoader)
+            .environment(appModel.dataStore)
+            .modelContainer(appModel.modelContainer)
         }
-        .modelContainer(for: RepositoryEntity.self)
     }
 }

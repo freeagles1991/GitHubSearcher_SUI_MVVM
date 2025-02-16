@@ -18,11 +18,11 @@ enum SearchStates {
 
 struct RepositoriesListView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(SwiftDataStoreController.self) private var dataStore
     
     @State var searchStates: SearchStates = .empty
     @State var searchText: String = ""
     @ObservedObject var repositoriesStorage: RepositoriesStorage
-    @ObservedObject var swiftDataStore: SwiftDataStoreController
     
     @State private var isFavoriteTabActive: Bool = false
     @State private var tabs: [TabModel] = []
@@ -36,6 +36,9 @@ struct RepositoriesListView: View {
     ]
     
     var body: some View {
+        let swiftDataStore = SwiftDataStoreController(modelContext: modelContext)
+        
+        
         NavigationStack {
             ZStack {
                 Color(.lightGray)
@@ -54,12 +57,11 @@ struct RepositoriesListView: View {
                             Text("Загрузка...")
                                 .frame(maxWidth: GlobalVars.screenWidth * 0.8, maxHeight: .infinity)
                         case .loaded:
-                            List(isFavoriteTabActive ? swiftDataStore.favoriteRepositories.indices :
-                                    repositoriesStorage.repositories.indices, id: \.self
+                            List(repositoriesStorage.repositories.indices, id: \.self
                                  //testRepoItems.indices, id: \.self
                             ) { index in
                                 RepositoryCell_SUI(dataLoader: dataLoader, swiftDataStore: swiftDataStore,
-                                                   repository: isFavoriteTabActive ? $swiftDataStore.favoriteRepositories[index] : $repositoriesStorage.repositories[index]
+                                                   repository: repositoriesStorage.repositories[index]
                                                    //$testRepoItems[index]
                                                    , cellHeight: GlobalVars.screenWidth * 0.18)
                                 .listRowBackground(Color.clear)
@@ -72,19 +74,16 @@ struct RepositoriesListView: View {
                             Text("Ошибка при загрузке! Повторите попытку")
                                 .frame(maxWidth: GlobalVars.screenWidth * 0.8, maxHeight: .infinity)
                         }
-                        
-                        
-                        
                     } else {
-                        List( swiftDataStore.favoriteRepositories.indices, id: \.self
-                              //testRepoItems.indices, id: \.self
-                        ) { index in
-                            RepositoryCell_SUI(dataLoader: dataLoader, swiftDataStore: swiftDataStore,
-                                               repository: $swiftDataStore.favoriteRepositories[index]
-                                               //$testRepoItems[index]
-                                               , cellHeight: GlobalVars.screenWidth * 0.18)
+                        List(swiftDataStore.favoriteRepositories, id: \.id) { repository in
+                            RepositoryCell_SUI(
+                                dataLoader: dataLoader,
+                                swiftDataStore: swiftDataStore,
+                                repository: repository,
+                                cellHeight: GlobalVars.screenWidth * 0.18)
                             .listRowBackground(Color.clear)
                             .listRowSeparator(.hidden)
+                            .environment(\.modelContext, modelContext)
                         }
                         .background(Color.clear)
                         .listStyle(.plain)
@@ -107,8 +106,6 @@ struct RepositoriesListView: View {
                     self.isFavoriteTabActive = true
                 })
             ]
-            
-            swiftDataStore.loadFavoriteRepositories()
         }
         
         .onChange(of: searchText) {

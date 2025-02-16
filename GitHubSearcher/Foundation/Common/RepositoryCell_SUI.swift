@@ -10,13 +10,15 @@ import SwiftUI
 struct RepositoryCell_SUI: View {
     let dataLoader: DataLoaderProtocol
     let swiftDataStore: SwiftDataStoreController
-    @Binding var repository: Repository
+    let repository: Repository
     var cellHeight: CGFloat = 70.0
     var onCellTap: (() -> Void)?
+    
+    @Environment(\.modelContext) private var modelContext
 
     var body: some View {
         NavigationLink {
-            RepositoryDetailView(swiftDataStore: swiftDataStore, dataLoader: dataLoader, repositoryModel: repository)
+            RepositoryDetailView(dataLoader: dataLoader, repository: repository)
         } label: {
             ZStack {
                 let title = repository.fullName

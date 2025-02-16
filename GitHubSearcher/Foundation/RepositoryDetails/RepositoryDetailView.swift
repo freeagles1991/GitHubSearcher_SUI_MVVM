@@ -10,10 +10,10 @@ import SwiftUI
 
 struct RepositoryDetailView: View {
     @Environment(\.modelContext) private var modelContext
-    @ObservedObject var swiftDataStore: SwiftDataStoreController
+    @Environment(SwiftDataStoreController.self) var swiftDataStore
     
     let dataLoader: DataLoaderProtocol
-    let repositoryModel: Repository
+    let repository: Repository
     var onAddFavoriteButtonTap: (() -> Void)?
     var onBackButtonTap: (() -> Void)?
     
@@ -28,7 +28,7 @@ struct RepositoryDetailView: View {
             VStack(alignment: .leading, spacing: 16) {
                 ZStack(alignment: .top) {
                     HStack(alignment: .center) {
-                        Text(repositoryModel.fullName)
+                        Text(repository.fullName)
                             .font(.largeTitle)
                             .padding()
                             .background(.green)
@@ -61,13 +61,13 @@ struct RepositoryDetailView: View {
                         Text("Description:")
                             .font(.title2)
                             .foregroundStyle(.gray)
-                        Text(repositoryModel.description ?? "none")
+                        Text(repository.description ?? "none")
                     }
                     
                     HStack {
                         Text("Owner:")
                             .foregroundStyle(.gray)
-                        Text(repositoryModel.owner)
+                        Text(repository.owner)
                     }
                     .font(.title2)
                     
@@ -90,7 +90,7 @@ struct RepositoryDetailView: View {
 
         }
         .onAppear() {
-            loadUserEmail(userName: repositoryModel.owner)
+            loadUserEmail(userName: repository.owner)
         }
     }
     
@@ -107,7 +107,11 @@ struct RepositoryDetailView: View {
     }
     
     private func handleFavoriteButtonTap() {
-        
+        if !swiftDataStore.repositoryExists(repository) {
+            swiftDataStore.addRepository(repository)
+        } else {
+            swiftDataStore.deleteRepository(repository)
+        }
     }
 }
 
