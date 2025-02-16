@@ -24,11 +24,9 @@ final class SwiftDataStoreController: ObservableObject {
             do {
                 let entities = try self.modelContext.fetch(request)
                 let repositories = entities.map { $0.toRepository() }
-
-                DispatchQueue.main.async {
-                    self.favoriteRepositories = repositories
-                    print("[DEBUG] Загружено \(self.favoriteRepositories.map { $0.fullName}) репозиторов")
-                }
+                
+                self.favoriteRepositories = repositories
+                print("[DEBUG] Загружено \(self.favoriteRepositories.map { $0.fullName}) репозиторов")
             } catch {
                 print("[ERROR] Ошибка загрузки данных: \(error)")
             }
@@ -45,7 +43,8 @@ final class SwiftDataStoreController: ObservableObject {
         modelContext.insert(newRepo)
         
         saveChanges()
-
+        
+        loadFavoriteRepositories()
         print("[DEBUG] Репозиторий '\(repo.fullName)' добавлен")
     }
     
@@ -56,12 +55,11 @@ final class SwiftDataStoreController: ObservableObject {
                 let entities = try self.modelContext.fetch(request)
                 if let existingRepo = entities.first(where: { $0.id == repo.id }) {
                     self.modelContext.delete(existingRepo)
-
+                    
                     self.saveChanges()
-
-                    DispatchQueue.main.async {
-                        self.loadFavoriteRepositories()
-                    }
+                    
+                    self.loadFavoriteRepositories()
+                    
                     print("[DEBUG] Репозиторий '\(repo.fullName)' удален")
                 } else {
                     print("[DEBUG] Репозиторий '\(repo.fullName)' не найден для удаления")
@@ -94,12 +92,11 @@ final class SwiftDataStoreController: ObservableObject {
                 for repo in entities {
                     self.modelContext.delete(repo)
                 }
-
+                
                 self.saveChanges()
-
-                DispatchQueue.main.async {
-                    self.loadFavoriteRepositories()
-                }
+                
+                self.loadFavoriteRepositories()
+                
                 print("[DEBUG] Удалены все (\(count)) репозитории")
             } catch {
                 print("[ERROR] Ошибка очистки данных: \(error)")
@@ -109,7 +106,7 @@ final class SwiftDataStoreController: ObservableObject {
     
     private func saveChanges() {
         do {
-            try modelContext.save()  // Сохраняем изменения в постоянное хранилище
+            try modelContext.save()
             print("[DEBUG] Изменения сохранены")
         } catch {
             print("[ERROR] Ошибка сохранения данных: \(error)")

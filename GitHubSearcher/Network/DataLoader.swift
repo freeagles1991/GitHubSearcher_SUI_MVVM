@@ -7,7 +7,7 @@
 import Foundation
 
 protocol DataLoaderProtocol {
-    func fetchRepoData(with params: [String: String], completion: @escaping () -> Void)
+    func fetchRepoData(with params: [String: String], completion: @escaping (Result<RepositoriesSearchResponse, Error>) -> Void)
     func fetchUserData(with userName: String, completion: @escaping (Result<UserResponse, Error>) -> Void)
     func cancelCurrentTask()
 }
@@ -21,7 +21,7 @@ struct DataLoader: DataLoaderProtocol{
         self.repositoriesStorage = repositoriesStorage
     }
     
-    func fetchRepoData(with params: [String: String], completion: @escaping () -> Void) {
+    func fetchRepoData(with params: [String: String], completion: @escaping (Result<RepositoriesSearchResponse, Error>) -> Void) {
         guard let baseUrl = URL(string: GlobalConstants.baseRepoUrl.rawValue),
               var components = URLComponents(url: baseUrl, resolvingAgainstBaseURL: false)
         else {return}
@@ -41,11 +41,14 @@ struct DataLoader: DataLoaderProtocol{
                 DispatchQueue.main.async {
                     self.repositoriesStorage.repositories = items.map { $0.toRepositoryModel }
                     print("Всего загружено \(self.repositoriesStorage.repositories.map { $0.fullName } ) репозиториев")
+                    completion(.success(response))
                 }
             case .failure(let error):
-                print("\(error)")
+                DispatchQueue.main.async {
+                    print("\(error)")
+                    completion(.failure(error))
+                }
             }
-            completion()
         }
     }
     

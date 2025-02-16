@@ -9,7 +9,6 @@ import SwiftUI
 
 
 struct RepositoryDetailView: View {
-    @Environment(\.modelContext) private var modelContext
     @EnvironmentObject var swiftDataStore: SwiftDataStoreController
     
     let dataLoader: DataLoaderProtocol
@@ -21,6 +20,10 @@ struct RepositoryDetailView: View {
     @State var isFavorite: Bool = false
     
     var body: some View {
+        let favoriteIconName: String = {
+            swiftDataStore.repositoryExists(repository) ? "star.fill" : "star"
+        }()
+        
         ZStack {
             Color(.lightGray)
                 .ignoresSafeArea()
@@ -31,7 +34,6 @@ struct RepositoryDetailView: View {
                         Text(repository.fullName)
                             .font(.largeTitle)
                             .padding()
-                            .background(.green)
                         
                         Spacer()
                     }
@@ -43,12 +45,12 @@ struct RepositoryDetailView: View {
                             Button(action: {
                                 handleFavoriteButtonTap()
                             }) {
-                                Image(systemName: "star")
+                                Image(systemName: favoriteIconName)
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: 40, height: 40)
                                     .padding()
-                                    .background(.red)
+                                    .foregroundStyle(Color.yellow)
                                 
                             }
                         }
@@ -118,5 +120,9 @@ struct RepositoryDetailView: View {
 #Preview {
     let testRepo = Repository.defaultRepoItem
     
-    //RepositoryDetailView(repositoryModel: testRepo)
+    RepositoryDetailView(
+        dataLoader: DataLoader(
+            networkClient: NetworkClient(),
+            repositoriesStorage: RepositoriesStorage()),
+        repository: testRepo)
 }

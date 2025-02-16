@@ -7,7 +7,7 @@
 
 import Foundation
 
-class RepositoriesStorage: ObservableObject {
+final class RepositoriesStorage: ObservableObject  {
     @Published var repositories: [Repository] = []
     
     func clearStorage() {

@@ -17,7 +17,6 @@ enum SearchStates {
 }
 
 struct RepositoriesListView: View {
-    @Environment(\.modelContext) private var modelContext
     @ObservedObject var repositoriesStorage: RepositoriesStorage
     @EnvironmentObject var swiftDataStore: SwiftDataStoreController
     
@@ -37,15 +36,15 @@ struct RepositoriesListView: View {
     ]
     
     var body: some View {
-        let swiftDataStore = SwiftDataStoreController(modelContext: modelContext)
-        
-        
         NavigationStack {
             ZStack {
                 Color(.lightGray)
                     .ignoresSafeArea()
                 
                 VStack {
+                    Text(isFavoriteTabActive ? "Favorites" : "GitHub Search")
+                        .font(.largeTitle)
+                    
                     if !isFavoriteTabActive {
                         CustomSearchBar_SUI(
                             searchText: $searchText)
@@ -70,31 +69,33 @@ struct RepositoriesListView: View {
                             }
                             .background(Color.clear)
                             .listStyle(.plain)
-                            .padding(.top, -10)
+                            .padding(.top)
                         case .error:
                             Text("Ошибка при загрузке! Повторите попытку")
                                 .frame(maxWidth: GlobalVars.screenWidth * 0.8, maxHeight: .infinity)
                         }
                     } else {
-                        List(swiftDataStore.favoriteRepositories.indices, id: \.self) { index in
-                            RepositoryCell_SUI(
-                                dataLoader: dataLoader,
-                                swiftDataStore: swiftDataStore,
-                                repository: swiftDataStore.favoriteRepositories[index],
-                                cellHeight: GlobalVars.screenWidth * 0.18)
-                            .listRowBackground(Color.clear)
-                            .listRowSeparator(.hidden)
-                            .environment(\.modelContext, modelContext)
+                        if !swiftDataStore.favoriteRepositories.isEmpty {
+                            List(swiftDataStore.favoriteRepositories.indices, id: \.self) { index in
+                                RepositoryCell_SUI(
+                                    dataLoader: dataLoader,
+                                    swiftDataStore: swiftDataStore,
+                                    repository: swiftDataStore.favoriteRepositories[index],
+                                    cellHeight: GlobalVars.screenWidth * 0.18)
+                                .listRowBackground(Color.clear)
+                                .listRowSeparator(.hidden)
+                            }
+                            .background(Color.clear)
+                            .listStyle(.plain)
+                            .padding(.top)
+                        } else {
+                            Text("В избранное пока ничего не добавлено")
+                                .frame(maxWidth: GlobalVars.screenWidth * 0.8, maxHeight: .infinity)
                         }
-                        .background(Color.clear)
-                        .listStyle(.plain)
-                        .padding(.top, -10)
                     }
                     
                     CustomTabBar_SUI(tabs: tabs)
                 }
-                //            .padding(.horizontal, GlobalVars.screenWidth * 0.025)
-                
             }
         }
         
@@ -118,8 +119,14 @@ struct RepositoriesListView: View {
                     "page" : "1"
                 ]
                 searchStates = .loading
-                dataLoader.fetchRepoData(with: params) {
-                    searchStates = .loaded
+                
+                dataLoader.fetchRepoData(with: params) {result in
+                    switch result {
+                    case .success(_):
+                        searchStates = .loaded
+                    case .failure(_):
+                        searchStates = .error
+                    }
                 }
             } else {
                 searchStates = .empty
@@ -135,5 +142,7 @@ struct RepositoriesListView: View {
 }
 
 #Preview {
-    //RepositoriesListView()
+//    RepositoriesListView(
+//        repositoriesStorage: <#T##RepositoriesStorage#>,
+//        dataLoader: <#T##any DataLoaderProtocol#>)
 }
