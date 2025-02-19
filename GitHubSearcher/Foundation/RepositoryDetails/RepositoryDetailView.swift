@@ -9,21 +9,18 @@ import SwiftUI
 
 
 struct RepositoryDetailView: View {
-    @EnvironmentObject var swiftDataStore: SwiftDataStoreController
     
     let dataLoader: DataLoaderProtocol
+    let swiftDataStore: SwiftDataStoreController
     let repository: Repository
     var onAddFavoriteButtonTap: (() -> Void)?
     var onBackButtonTap: (() -> Void)?
     
-    @State var userEmail: String?
-    @State var isFavorite: Bool = false
+    @State private var favoriteIconName: String = "star"
+    @State private var userEmail: String?
     
     var body: some View {
-        let favoriteIconName: String = {
-            swiftDataStore.repositoryExists(repository) ? "star.fill" : "star"
-        }()
-        
+
         ZStack {
             Color(.lightGray)
                 .ignoresSafeArea()
@@ -85,14 +82,16 @@ struct RepositoryDetailView: View {
                 .background(Color.white)
                 .clipShape(.rect(cornerRadius: 16))
                 .padding(.horizontal)
-
-            
+                
+                
                 Spacer()
             }
-
+            
         }
         .onAppear() {
+            updateFavoriteIcon()
             loadUserEmail(userName: repository.owner)
+            
         }
     }
     
@@ -110,19 +109,38 @@ struct RepositoryDetailView: View {
     
     private func handleFavoriteButtonTap() {
         if !swiftDataStore.repositoryExists(repository) {
-            swiftDataStore.addRepository(repository)
+            swiftDataStore.addRepository(repository) { result in
+                switch result {
+                case .success():
+                    updateFavoriteIcon()
+                case .failure(_):
+                    print("Fail")
+                }
+            }
         } else {
-            swiftDataStore.deleteRepository(repository)
+            swiftDataStore.deleteRepository(repository)  { result in
+                switch result {
+                case .success():
+                    updateFavoriteIcon()
+                case .failure(_):
+                    print("Fail")
+                }
+            }
         }
+        
+    }
+    
+    private func updateFavoriteIcon() {
+        favoriteIconName = swiftDataStore.repositoryExists(repository) ? "star.fill" : "star"
     }
 }
 
 #Preview {
     let testRepo = Repository.defaultRepoItem
     
-    RepositoryDetailView(
-        dataLoader: DataLoader(
-            networkClient: NetworkClient(),
-            repositoriesStorage: RepositoriesStorage()),
-        repository: testRepo)
+//    RepositoryDetailView(
+//        dataLoader: DataLoader(
+//            networkClient: NetworkClient(),
+//            repositoriesStorage: RepositoriesStorage()),
+//        repository: testRepo)
 }

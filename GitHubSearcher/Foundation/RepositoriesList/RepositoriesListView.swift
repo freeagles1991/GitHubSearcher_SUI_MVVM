@@ -9,31 +9,11 @@ import SwiftUI
 import CoreData
 import SwiftData
 
-enum SearchStates {
-    case empty
-    case loading
-    case loaded
-    case error
-}
-
 struct RepositoriesListView: View {
-    @ObservedObject var repositoriesStorage: RepositoriesStorage
-    @EnvironmentObject var swiftDataStore: SwiftDataStoreController
-    
-    @State var searchStates: SearchStates = .empty
-    @State var searchText: String = ""
-
+    @StateObject var viewModel: RepositoriesListViewModel
     
     @State private var isFavoriteTabActive: Bool = false
     @State private var tabs: [TabModel] = []
-    
-    let dataLoader: DataLoaderProtocol
-    
-    @State var testRepoItems: [Repository] = [
-        Repository.defaultRepoItem,
-        Repository.defaultRepoItem,
-        Repository.defaultRepoItem,
-    ]
     
     var body: some View {
         NavigationStack {
@@ -46,10 +26,9 @@ struct RepositoriesListView: View {
                         .font(.largeTitle)
                     
                     if !isFavoriteTabActive {
-                        CustomSearchBar_SUI(
-                            searchText: $searchText)
+                        CustomSearchBar_SUI(searchText: $viewModel.searchText)
                         
-                        switch searchStates {
+                        switch viewModel.searchStates {
                         case .empty:
                             Text("Ничего не найдено или поисковая строка пустая")
                                 .frame(maxWidth: GlobalVars.screenWidth * 0.8, maxHeight: .infinity)
@@ -57,31 +36,36 @@ struct RepositoriesListView: View {
                             Text("Загрузка...")
                                 .frame(maxWidth: GlobalVars.screenWidth * 0.8, maxHeight: .infinity)
                         case .loaded:
-                            List(repositoriesStorage.repositories.indices, id: \.self
-                            ) { index in
-                                RepositoryCell_SUI(
-                                    dataLoader: dataLoader,
-                                    swiftDataStore: swiftDataStore,
-                                    repository: repositoriesStorage.repositories[index],
-                                    cellHeight: GlobalVars.screenWidth * 0.18)
-                                .listRowBackground(Color.clear)
-                                .listRowSeparator(.hidden)
+                            List(viewModel.repositories.indices, id: \.self) { index in
+                                NavigationLink(destination: RepositoryDetailView(
+                                    dataLoader: viewModel.dataLoader,
+                                    swiftDataStore: viewModel.swiftDataStore,
+                                    repository: viewModel.repositories[index]
+                                )) {
+                                    RepositoryCell_SUI(
+                                                       repository: viewModel.repositories[index],
+                                                       cellHeight: GlobalVars.screenWidth * 0.18
+                                    )
+                                    .listRowBackground(Color.clear)
+                                    .listRowSeparator(.hidden)
+                                }
+                                .buttonStyle(PlainButtonStyle())
                             }
                             .background(Color.clear)
                             .listStyle(.plain)
                             .padding(.top)
+                            .listStyle(PlainListStyle())
                         case .error:
                             Text("Ошибка при загрузке! Повторите попытку")
                                 .frame(maxWidth: GlobalVars.screenWidth * 0.8, maxHeight: .infinity)
                         }
                     } else {
-                        if !swiftDataStore.favoriteRepositories.isEmpty {
-                            List(swiftDataStore.favoriteRepositories.indices, id: \.self) { index in
+                        if !viewModel.favoriteRepositories.isEmpty {
+                            List(viewModel.favoriteRepositories.indices, id: \.self) { index in
                                 RepositoryCell_SUI(
-                                    dataLoader: dataLoader,
-                                    swiftDataStore: swiftDataStore,
-                                    repository: swiftDataStore.favoriteRepositories[index],
-                                    cellHeight: GlobalVars.screenWidth * 0.18)
+                                    repository: viewModel.favoriteRepositories[index],
+                                    cellHeight: GlobalVars.screenWidth * 0.18
+                                )
                                 .listRowBackground(Color.clear)
                                 .listRowSeparator(.hidden)
                             }
@@ -98,51 +82,26 @@ struct RepositoriesListView: View {
                 }
             }
         }
-        
-        .onAppear() {
+        .onAppear {
             tabs = [
                 TabModel(imageName: "magnifyingglass", action: {
                     self.isFavoriteTabActive = false
                 }),
                 TabModel(imageName: "star.fill", action: {
                     self.isFavoriteTabActive = true
+                    viewModel.toggleFavoriteTab(isActive: true)
                 })
             ]
-        }
-        
-        .onChange(of: searchText) {
-            if !searchText.isEmpty || searchText != "" {
-                let params: [String: String] = [
-                    "q" : searchText,
-                    "sort" : "stars",
-                    "per_page" : "100",
-                    "page" : "1"
-                ]
-                searchStates = .loading
-                
-                dataLoader.fetchRepoData(with: params) {result in
-                    switch result {
-                    case .success(_):
-                        searchStates = .loaded
-                    case .failure(_):
-                        searchStates = .error
-                    }
-                }
-            } else {
-                searchStates = .empty
-                dataLoader.cancelCurrentTask()
-                repositoriesStorage.clearStorage()
-            }
-        }
-        
-        .onChange(of: isFavoriteTabActive) {
-            print("isFavoriteTabActive changed \(isFavoriteTabActive)")
         }
     }
 }
 
 #Preview {
-//    RepositoriesListView(
-//        repositoriesStorage: <#T##RepositoriesStorage#>,
-//        dataLoader: <#T##any DataLoaderProtocol#>)
+    //    RepositoriesListView(
+    //        viewModel: RepositoriesListViewModel(
+    //            dataLoader: DataLoader(),
+    //            repositoriesStorage: RepositoriesStorage(),
+    //            swiftDataStore: SwiftDataStoreController(modelContext: ModelContext())
+    //        )
+    //    )
 }

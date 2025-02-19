@@ -18,12 +18,10 @@ struct GitHubSearcherApp: App {
         let dataLoader = DataLoader(
             networkClient: networkClient,
             repositoriesStorage: repositoriesStorage)
+        let repositoriesListVM = RepositoriesListViewModel(dataLoader: dataLoader, repositoriesStorage: repositoriesStorage, swiftDataStore: appModel.dataStore)
         
         WindowGroup {
-            RepositoriesListView(
-                repositoriesStorage: repositoriesStorage, dataLoader: dataLoader)
-            .environmentObject(appModel.dataStore)
-            .modelContainer(appModel.modelContainer)
+            RepositoriesListView(viewModel: repositoriesListVM)
         }
     }
 }
