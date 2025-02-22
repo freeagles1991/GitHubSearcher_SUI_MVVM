@@ -19,7 +19,6 @@ class RepositoriesListViewModel: ObservableObject {
     @Published var searchText: String = ""
     @Published var searchStates: SearchStates = .empty
     @Published var repositories: [Repository] = []
-    @Published var favoriteRepositories: [Repository] = []
     
     var dataLoader: DataLoaderProtocol
     var swiftDataStore: SwiftDataStoreController
@@ -67,12 +66,6 @@ class RepositoriesListViewModel: ObservableObject {
             case .failure:
                 self.searchStates = .error
             }
-        }
-    }
-    
-    @MainActor func toggleFavoriteTab(isActive: Bool) {
-        if isActive {
-            favoriteRepositories = swiftDataStore.favoriteRepositories
         }
     }
 }

@@ -57,5 +57,5 @@ struct CustomSearchBar_SUI: View {
 
 
 #Preview {
-//    CustomSearchBar_SUI(searchText: <#T##Binding<String>#>)
+
 }

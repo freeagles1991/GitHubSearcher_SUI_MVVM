@@ -38,5 +38,5 @@ struct RepositoryCell_SUI: View {
 }
 
 #Preview {
-    //RepositoryCell_SUI()
+
 }

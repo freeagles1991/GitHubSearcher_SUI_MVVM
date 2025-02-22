@@ -60,7 +60,7 @@ struct Owner: Codable {
 }
 
 // MARK: - RepositoryLightweight
-struct Repository {
+struct Repository: Identifiable, Hashable, Equatable {
     let id: UUID
     let fullName: String
     let owner: String

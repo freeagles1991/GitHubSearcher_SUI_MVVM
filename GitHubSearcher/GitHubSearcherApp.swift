@@ -11,7 +11,8 @@ import SwiftData
 @main
 struct GitHubSearcherApp: App {
     @StateObject private var appModel = AppModel()
-
+    @StateObject private var flowController = FlowController()
+    
     var body: some Scene {
         let networkClient = NetworkClient()
         let repositoriesStorage = RepositoriesStorage()
@@ -21,7 +22,20 @@ struct GitHubSearcherApp: App {
         let repositoriesListVM = RepositoriesListViewModel(dataLoader: dataLoader, repositoriesStorage: repositoriesStorage, swiftDataStore: appModel.dataStore)
         
         WindowGroup {
-            RepositoriesListView(viewModel: repositoriesListVM)
+            NavigationStack(path: $flowController.navigationPath) {
+                RepositoriesListView(viewModel: repositoriesListVM)
+                    .environmentObject(flowController)
+                    .navigationDestination(for: FlowDestination.self) { destination in
+                        switch destination {
+                        case .repositoryDetail(let repository):
+                            RepositoryDetailView(
+                                dataLoader: repositoriesListVM.dataLoader,
+                                swiftDataStore: repositoriesListVM.swiftDataStore,
+                                repository: repository
+                            )
+                        }
+                    }
+            }
         }
     }
 }
