@@ -63,7 +63,7 @@ struct CustomTabBarIcon_SUI: View  {
         
         let tabIconColor: Color = isActive ? Color.yellow : Color.white
         
-        let tabBgColor: Color = isActive ?  Color.gray : Color.gray.opacity(0.5)
+        let tabBgColor: Color = Color.gray
         
         Button(action: {
             onTapButton?()
