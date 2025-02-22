@@ -29,9 +29,8 @@ struct GitHubSearcherApp: App {
                         switch destination {
                         case .repositoryDetail(let repository):
                             RepositoryDetailView(
-                                dataLoader: repositoriesListVM.dataLoader,
-                                swiftDataStore: repositoriesListVM.swiftDataStore,
-                                repository: repository
+                                repository: repository, dataLoader: repositoriesListVM.dataLoader,
+                                swiftDataStore: repositoriesListVM.swiftDataStore
                             )
                         }
                     }

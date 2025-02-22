@@ -26,7 +26,7 @@ final class SwiftDataStoreController: ObservableObject {
                 let repositories = entities.map { $0.toRepository() }
                 
                 self.favoriteRepositories = repositories
-                print("[DEBUG] Загружено \(self.favoriteRepositories.map { $0.fullName}) репозиторов")
+                print("[DEBUG] Загружено \(self.favoriteRepositories.count) репозиториев")
             } catch {
                 print("[ERROR] Ошибка загрузки данных: \(error)")
             }
@@ -112,15 +112,15 @@ final class SwiftDataStoreController: ObservableObject {
                 case .success:
                     self.loadFavoriteRepositories()
                     print("[DEBUG] Удалены все (\(count)) репозитории")
-                    completion(.success(()))  // Уведомляем об успешном завершении
+                    completion(.success(()))
                 case .failure(let error):
                     print("[ERROR] Ошибка сохранения изменений: \(error)")
-                    completion(.failure(error))  // Уведомляем об ошибке
+                    completion(.failure(error))
                 }
             }
         } catch {
             print("[ERROR] Ошибка очистки данных: \(error)")
-            completion(.failure(error))  // Уведомляем об ошибке
+            completion(.failure(error))
         }
     }
     

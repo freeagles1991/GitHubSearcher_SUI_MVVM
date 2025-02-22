@@ -15,6 +15,7 @@ enum SearchStates {
     case error
 }
 
+@MainActor
 class RepositoriesListViewModel: ObservableObject {
     @Published var searchText: String = ""
     @Published var searchStates: SearchStates = .empty
