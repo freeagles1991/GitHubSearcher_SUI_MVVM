@@ -25,6 +25,9 @@ class RepositoriesListViewModel: ObservableObject {
     var swiftDataStore: SwiftDataStoreController
     private var repositoriesStorage: RepositoriesStorage
     private var cancellables = Set<AnyCancellable>()
+    private var currentPage: Int = 1
+    private let perPage: Int = 50
+    private var isLoadingMore: Bool = false
     
     init(dataLoader: DataLoaderProtocol, repositoriesStorage: RepositoriesStorage, swiftDataStore: SwiftDataStoreController) {
         self.dataLoader = dataLoader
@@ -38,35 +41,51 @@ class RepositoriesListViewModel: ObservableObject {
             .debounce(for: .seconds(0.5), scheduler: RunLoop.main)
             .removeDuplicates()
             .sink { [weak self] text in
-                self?.searchRepositories(with: text)
+                self?.searchRepositories(with: text, reset: true)
             }
             .store(in: &cancellables)
     }
     
-    func searchRepositories(with searchText: String) {
+    func searchRepositories(with searchText: String, reset: Bool = false) {
         if searchText.isEmpty {
             searchStates = .empty
             repositoriesStorage.clearStorage()
             return
         }
         
-        searchStates = .loading
+        if reset {
+            searchStates = .loading
+            repositories.removeAll()
+            currentPage = 1
+        }
+        
+        isLoadingMore = true
         
         let params: [String: String] = [
             "q" : searchText,
             "sort" : "stars",
-            "per_page" : "100",
-            "page" : "1"
+            "per_page" : "\(perPage)",
+            "page" : "\(currentPage)"
         ]
         
         dataLoader.fetchRepoData(with: params) { result in
+            self.isLoadingMore = false
             switch result {
             case .success(let repos):
-                self.repositories = repos
+                self.repositories.append(contentsOf: repos)
                 self.searchStates = .loaded
+                self.currentPage += 1
             case .failure:
                 self.searchStates = .error
             }
         }
+    }
+    
+    func loadMoreRepositories() {
+        if isLoadingMore {
+            return
+        }
+    
+        searchRepositories(with: searchText, reset: false)
     }
 }

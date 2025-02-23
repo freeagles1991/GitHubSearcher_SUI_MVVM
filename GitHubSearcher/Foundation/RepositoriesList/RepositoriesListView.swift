@@ -64,6 +64,12 @@ struct RepositoriesListView: View {
                                 }
                                 .listRowBackground(Color.clear)
                                 .listRowSeparator(.hidden)
+                                
+                                .onAppear {
+                                    if index > viewModel.repositories.count - 25 {
+                                        viewModel.loadMoreRepositories()
+                                    }
+                                }
                             }
                             .listStyle(.plain)
                             .background(Color.clear)
