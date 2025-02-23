@@ -15,6 +15,10 @@ struct RepositoryDetailView: View {
     }
 
     var body: some View {
+        let email = viewModel.isFavoriteRepository() ?
+        viewModel.repository.ownerEmail :
+       viewModel.userEmail ?? "None"
+        
         ZStack {
             Color(.lightGray)
                 .ignoresSafeArea()
@@ -61,7 +65,7 @@ struct RepositoryDetailView: View {
                     HStack {
                         Text("E-mail:")
                             .foregroundStyle(.gray)
-                        Text(viewModel.userEmail ?? "None")
+                        Text(email)
                     }
                     .font(.title2)
                 }

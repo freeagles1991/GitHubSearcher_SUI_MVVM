@@ -14,14 +14,21 @@ class RepositoryDetailViewModel: ObservableObject {
     private(set) var repository: Repository
 
     @Published var favoriteIconName: String = "star"
-    @Published var userEmail: String?
+    @Published var userEmail: String? = "Loading..."
 
     init(repository: Repository, dataLoader: DataLoaderProtocol, swiftDataStore: SwiftDataStoreController) {
         self.repository = repository
         self.dataLoader = dataLoader
         self.swiftDataStore = swiftDataStore
-        loadUserEmail(userName: repository.owner)
+        if !isFavoriteRepository() {
+            loadUserEmail(userName: repository.owner)
+        }
+        userEmail = repository.ownerEmail
         updateFavoriteIcon()
+    }
+    
+    func isFavoriteRepository() -> Bool  {
+        swiftDataStore.repositoryExists(repository)
     }
 
     func loadUserEmail(userName: String) {
@@ -29,17 +36,25 @@ class RepositoryDetailViewModel: ObservableObject {
             switch result {
             case .success(let userResponse):
                 DispatchQueue.main.async {
-                    self?.userEmail = userResponse.email
+                    if let email = userResponse.email {
+                        self?.userEmail = email
+                    } else {
+                        self?.userEmail = "none"
+                    }
+                    
                 }
             case .failure(let error):
                 print("Email loading error - \(error)")
+                self?.userEmail = "Loading error"
             }
         }
     }
 
     func handleFavoriteButtonTap() {
         if !swiftDataStore.repositoryExists(repository) {
-            swiftDataStore.addRepository(repository) { result in
+            let newRepo = Repository(id: repository.id, fullName: repository.fullName, owner: repository.owner, description: repository.description, ownerEmail: userEmail ?? "none")
+            self.repository = newRepo
+            swiftDataStore.addRepository(newRepo) { result in
                 switch result {
                 case .success():
                       self.updateFavoriteIcon()
