@@ -13,11 +13,20 @@ struct RepositoryDetailView: View {
     init(repository: Repository, dataLoader: DataLoaderProtocol, swiftDataStore: SwiftDataStoreController) {
         _viewModel = StateObject(wrappedValue: RepositoryDetailViewModel(repository: repository, dataLoader: dataLoader, swiftDataStore: swiftDataStore))
     }
+    
+    enum Constants {
+        enum Texts: String {
+            case noneText = "None"
+            case descriptionText = "Description:"
+            case ownerText =  "Owner:"
+            case emailText = "E-mail:"
+        }
+    }
 
     var body: some View {
         let email = viewModel.isFavoriteRepository() ?
         viewModel.repository.ownerEmail :
-       viewModel.userEmail ?? "None"
+        viewModel.userEmail ?? Constants.Texts.noneText.rawValue
         
         ZStack {
             Color(.lightGray)
@@ -50,20 +59,20 @@ struct RepositoryDetailView: View {
                 }
 
                 VStack(alignment: .leading) {
-                    Text("Description:")
+                    Text(Constants.Texts.descriptionText.rawValue)
                         .font(.title2)
                         .foregroundStyle(.gray)
-                    Text(viewModel.repository.description ?? "None")
+                    Text(viewModel.repository.description ?? Constants.Texts.noneText.rawValue)
 
                     HStack {
-                        Text("Owner:")
+                        Text(Constants.Texts.ownerText.rawValue)
                             .foregroundStyle(.gray)
                         Text(viewModel.repository.owner)
                     }
                     .font(.title2)
 
                     HStack {
-                        Text("E-mail:")
+                        Text(Constants.Texts.emailText.rawValue)
                             .foregroundStyle(.gray)
                         Text(email)
                     }

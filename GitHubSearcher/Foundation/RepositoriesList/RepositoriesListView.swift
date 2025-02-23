@@ -16,6 +16,22 @@ struct RepositoriesListView: View {
     @State private var isFavoriteTabActive: Bool = false
     @State private var tabs: [TabModel] = []
     
+    enum Constants {
+        enum Texts: String {
+            case titleFavorites = "Favorites"
+            case titleMain = "GitHub Search"
+            case emptySearchText = "Nothing found or the search bar is empty"
+            case loadingText = "Loading..."
+            case errorText = "Error loading! Please try again"
+            case emptyFavoriteText = "Nothing has been added to favorites yet"
+        }
+        
+        enum ImageNames: String {
+            case searchTabIcon = "magnifyingglass"
+            case favoritesTabIcon = "star.fill"
+        }
+    }
+    
     var body: some View {
         NavigationStack {
             ZStack {
@@ -23,7 +39,7 @@ struct RepositoriesListView: View {
                     .ignoresSafeArea()
                 
                 VStack {
-                    Text(isFavoriteTabActive ? "Favorites" : "GitHub Search")
+                    Text(isFavoriteTabActive ? Constants.Texts.titleFavorites.rawValue : Constants.Texts.titleMain.rawValue)
                         .font(.largeTitle)
                     
                     if !isFavoriteTabActive {
@@ -31,10 +47,10 @@ struct RepositoriesListView: View {
                         
                         switch viewModel.searchStates {
                         case .empty:
-                            Text("Ничего не найдено или поисковая строка пустая")
+                            Text(Constants.Texts.emptySearchText.rawValue)
                                 .frame(maxWidth: GlobalVars.screenWidth * 0.8, maxHeight: .infinity)
                         case .loading:
-                            Text("Загрузка...")
+                            Text(Constants.Texts.loadingText.rawValue)
                                 .frame(maxWidth: GlobalVars.screenWidth * 0.8, maxHeight: .infinity)
                         case .loaded:
                             List(viewModel.repositories.indices, id: \.self) { index in
@@ -53,7 +69,7 @@ struct RepositoriesListView: View {
                             .background(Color.clear)
                             .padding(.top)
                         case .error:
-                            Text("Ошибка при загрузке! Повторите попытку")
+                            Text(Constants.Texts.errorText.rawValue)
                                 .frame(maxWidth: GlobalVars.screenWidth * 0.8, maxHeight: .infinity)
                         }
                     } else {
@@ -74,7 +90,7 @@ struct RepositoriesListView: View {
                             .background(Color.clear)
                             .padding(.top)
                         } else {
-                            Text("В избранное пока ничего не добавлено")
+                            Text(Constants.Texts.emptyFavoriteText.rawValue)
                                 .frame(maxWidth: GlobalVars.screenWidth * 0.8, maxHeight: .infinity)
                         }
                     }
@@ -85,10 +101,10 @@ struct RepositoriesListView: View {
         }
         .onAppear {
             tabs = [
-                TabModel(imageName: "magnifyingglass", action: {
+                TabModel(imageName: Constants.ImageNames.searchTabIcon.rawValue, action: {
                     self.isFavoriteTabActive = false
                 }),
-                TabModel(imageName: "star.fill", action: {
+                TabModel(imageName: Constants.ImageNames.favoritesTabIcon.rawValue, action: {
                     self.isFavoriteTabActive = true
                 })
             ]

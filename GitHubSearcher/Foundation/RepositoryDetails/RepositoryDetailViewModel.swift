@@ -13,14 +13,29 @@ class RepositoryDetailViewModel: ObservableObject {
     private let swiftDataStore: SwiftDataStoreController
     private(set) var repository: Repository
 
-    @Published var favoriteIconName: String = "star"
-    @Published var userEmail: String? = "Loading..."
+    @Published var favoriteIconName: String
+    @Published var userEmail: String?
+    
+    enum Constants {
+        enum Texts: String {
+            case loadingText = "Loading..."
+            case loadingErrorText = "Loading error"
+            case noneText = "None"
+        }
+        
+        enum ImageNames: String {
+            case addFavoriteIcon = "star"
+            case deleteFavoriteIcon = "star.fill"
+        }
+    }
 
     init(repository: Repository, dataLoader: DataLoaderProtocol, swiftDataStore: SwiftDataStoreController) {
         self.repository = repository
         self.dataLoader = dataLoader
         self.swiftDataStore = swiftDataStore
+        self.favoriteIconName = Constants.ImageNames.addFavoriteIcon.rawValue
         if !isFavoriteRepository() {
+            userEmail = Constants.Texts.loadingText.rawValue
             loadUserEmail(userName: repository.owner)
         }
         userEmail = repository.ownerEmail
@@ -39,20 +54,20 @@ class RepositoryDetailViewModel: ObservableObject {
                     if let email = userResponse.email {
                         self?.userEmail = email
                     } else {
-                        self?.userEmail = "none"
+                        self?.userEmail = Constants.Texts.noneText.rawValue
                     }
                     
                 }
             case .failure(let error):
                 print("Email loading error - \(error)")
-                self?.userEmail = "Loading error"
+                self?.userEmail = Constants.Texts.loadingErrorText.rawValue
             }
         }
     }
 
     func handleFavoriteButtonTap() {
         if !swiftDataStore.repositoryExists(repository) {
-            let newRepo = Repository(id: repository.id, fullName: repository.fullName, owner: repository.owner, description: repository.description, ownerEmail: userEmail ?? "none")
+            let newRepo = Repository(id: repository.id, fullName: repository.fullName, owner: repository.owner, description: repository.description, ownerEmail: userEmail ?? Constants.Texts.noneText.rawValue)
             self.repository = newRepo
             swiftDataStore.addRepository(newRepo) { result in
                 switch result {
@@ -76,6 +91,6 @@ class RepositoryDetailViewModel: ObservableObject {
 
     
     @MainActor private func updateFavoriteIcon() {
-        favoriteIconName = swiftDataStore.repositoryExists(repository) ? "star.fill" : "star"
+        favoriteIconName = swiftDataStore.repositoryExists(repository) ? Constants.ImageNames.deleteFavoriteIcon.rawValue : Constants.ImageNames.addFavoriteIcon.rawValue
     }
 }
